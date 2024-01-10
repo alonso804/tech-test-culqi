@@ -3,13 +3,33 @@ services:
   mysql:
     image: mysql:8.0
     container_name: mysql_db
-    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: exchange
-      MYSQL_USER: user
-      MYSQL_PASSWORD: root
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - ./mysql:/var/lib/mysql
     ports:
       - "3306:3306"
+  nest:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nest_app
+    environment:
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET}
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_PORT: ${MYSQL_PORT}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    depends_on:
+      - mysql
+    ports:
+      - "3000:3000"
+    network_mode: "host"
+networks:
+  tech_test_network:
+    driver: bridge

@@ -22,20 +22,21 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+## Descripción
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Installation
+## Installación
 
 ```bash
-$ pnpm install
+$ pnpm install --frozen-lockfile
 ```
 
-## Running the app
+## Correr la aplicación en desarrollo
+
+Deberá tener instalado `docker` y levantar la imagen de `mysql` que está en el archivo `docker-compose.yml`.
 
 ```bash
-# watch mode
 $ pnpm run start:dev
 ```
 

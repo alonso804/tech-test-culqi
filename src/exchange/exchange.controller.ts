@@ -1,9 +1,27 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import { JwtGuard } from 'src/auth/guards/auth.guard';
+import { CurrencyNotFoundException } from 'src/errors/currency-not-found';
 
+import { CalculateExchangeDto } from './dto/calculate-exchange.dto';
 import { CreateExchangeDto } from './dto/create-exchange.dto';
 import { UpdateExchangeDto } from './dto/update-exchange.dto';
 import { ExchangeService } from './exchange.service';
 
+@ApiTags('exchange')
 @Controller('exchange')
 export class ExchangeController {
   constructor(private readonly exchangeService: ExchangeService) {}
@@ -18,12 +36,18 @@ export class ExchangeController {
     return this.exchangeService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.exchangeService.findOne(+id);
+  @Get(':currency')
+  async findOne(@Param('currency') currency: string) {
+    const exchange = await this.exchangeService.findOne(currency);
+
+    if (!exchange) {
+      throw new CurrencyNotFoundException({ currency });
+    }
+
+    return exchange;
   }
 
-  @Patch(':id')
+  @Patch(':currency')
   update(
     @Param('currency') currency: string,
     @Body() updateExchangeDto: UpdateExchangeDto,
@@ -31,16 +55,11 @@ export class ExchangeController {
     return this.exchangeService.update(currency, updateExchangeDto);
   }
 
-  @Get()
-  getExchange(
-    @Param('amount') amount: number,
-    @Param('sourceCurrency') sourceCurrency: string,
-    @Param('targetCurrency') targetCurrency: string,
-  ) {
-    return this.exchangeService.getExchange(
-      amount,
-      sourceCurrency,
-      targetCurrency,
-    );
+  @ApiBearerAuth()
+  @ApiUnauthorizedResponse({ description: 'Unauthorized Bearer Auth' })
+  @Get('calculate')
+  @UseGuards(JwtGuard)
+  getExchange(@Query() calculateExchangeDto: CalculateExchangeDto) {
+    return this.exchangeService.getExchange(calculateExchangeDto);
   }
 }

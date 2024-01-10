@@ -1,14 +1,18 @@
 import type { MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import type { FastifyRequest } from 'fastify';
 import { LoggerModule } from 'nestjs-pino';
 
+import { AuthModule } from './auth/auth.module';
+import env from './env';
 import { ExchangeModule } from './exchange/exchange.module';
 import {
   REQUEST_ID_HEADER,
   RequestIdMiddleware,
 } from './request-id/request-id.middleware';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -33,14 +37,20 @@ import {
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
-      port: 3307,
+      port: 3306,
       username: 'root',
       password: 'root',
-      database: 'tech_test',
+      database: 'exchange',
       autoLoadEntities: true,
       synchronize: process.env.NODE_ENV !== 'production',
     }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [env],
+    }),
     ExchangeModule,
+    UsersModule,
+    AuthModule,
   ],
 })
 export class AppModule implements NestModule {

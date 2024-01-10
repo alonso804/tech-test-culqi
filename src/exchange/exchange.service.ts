@@ -1,26 +1,91 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import Decimal from 'decimal.js';
+import { CurrencyNotFoundException } from 'src/errors/currency-not-found';
+import { ExchangeDuplicatedException } from 'src/errors/exchange-duplicated';
+import { Repository } from 'typeorm';
 
+import type { CalculateExchangeDto } from './dto/calculate-exchange.dto';
 import type { CreateExchangeDto } from './dto/create-exchange.dto';
 import type { UpdateExchangeDto } from './dto/update-exchange.dto';
+import { Exchange } from './entities/exchange.entity';
 
 @Injectable()
 export class ExchangeService {
-  create(createExchangeDto: CreateExchangeDto) {
-    return 'This action adds a new exchange';
+  private readonly logger = new Logger(ExchangeService.name);
+
+  constructor(
+    @InjectRepository(Exchange)
+    private readonly exchangeRepository: Repository<Exchange>,
+  ) {}
+
+  async create(createExchangeDto: CreateExchangeDto) {
+    try {
+      const newExchange = await this.exchangeRepository.save(createExchangeDto);
+
+      return newExchange;
+    } catch (error) {
+      this.logger.error(error);
+
+      throw new ExchangeDuplicatedException({
+        currency: createExchangeDto.currency,
+      });
+    }
   }
 
-  findAll() {
-    return `This action returns all exchange`;
+  async findAll() {
+    return this.exchangeRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} exchange`;
+  async findOne(currency: string) {
+    const exchange = await this.exchangeRepository.findOneBy({ currency });
+
+    return exchange;
   }
 
-  update(currency: string, updateExchangeDto: UpdateExchangeDto) {
-    return `This action updates a #${currency} exchange`;
+  async update(currency: string, updateExchangeDto: UpdateExchangeDto) {
+    return this.exchangeRepository.update({ currency }, updateExchangeDto);
   }
 
-  getExchange(amount: number, sourceCurrency: string, targetCurrency: string) {
+  async getExchange({
+    amount,
+    sourceCurrency,
+    targetCurrency,
+  }: CalculateExchangeDto) {
+    const [sourceExchange, targetExchange] = await Promise.all([
+      this.exchangeRepository.findOneBy({ currency: sourceCurrency }),
+      this.exchangeRepository.findOneBy({ currency: targetCurrency }),
+    ]);
+
+    this.logger.log({ sourceExchange, targetExchange });
+
+    if (!sourceExchange) {
+      throw new CurrencyNotFoundException({ currency: sourceCurrency });
+    }
+
+    if (!targetExchange) {
+      throw new CurrencyNotFoundException({ currency: targetCurrency });
+    }
+
+    const amounts = {
+      amount: new Decimal(amount).div(100),
+      source: new Decimal(sourceExchange.amount).div(100),
+      target: new Decimal(targetExchange.amount).div(100),
+    };
+
+    const exchange = amounts.amount
+      .mul(amounts.target)
+      .div(amounts.source)
+      .toNumber();
+
+    return {
+      exchange,
+      amount: amounts.amount.toNumber(),
+      currency: {
+        source: sourceCurrency,
+        target: targetCurrency,
+      },
+      exchangeRate: amounts.target.div(amounts.source).toNumber(),
+    };
   }
 }

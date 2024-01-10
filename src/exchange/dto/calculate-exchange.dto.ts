@@ -2,24 +2,26 @@ import { Transform } from 'class-transformer';
 import {
   IsInt,
   IsNumber,
-  IsOptional,
   IsPositive,
   IsString,
   IsUppercase,
 } from 'class-validator';
 
-export class UpdateExchangeDto {
+export class CalculateExchangeDto {
   @Transform((value) => Number(value))
   @IsNumber()
   @IsPositive()
   @Transform((value) => value * 100)
   @IsInt({ message: 'Amount must have 2 decimal places' })
-  @IsOptional()
-  amount?: number;
+  amount: number;
 
   @Transform((value) => value.toUpperCase())
   @IsString()
   @IsUppercase()
-  @IsOptional()
-  currency?: string;
+  sourceCurrency: string;
+
+  @Transform((value) => value.toUpperCase())
+  @IsString()
+  @IsUppercase()
+  targetCurrency: string;
 }

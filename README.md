@@ -35,14 +35,8 @@ $ pnpm install
 ## Running the app
 
 ```bash
-# development
-$ pnpm run start
-
 # watch mode
 $ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
 ```
 
 ## Test
@@ -52,16 +46,28 @@ $ pnpm run start:prod
 $ pnpm run test
 ```
 
-## Support
+## Levantar el servidor
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Variables de entorno
 
-## Stay in touch
+1. Debe crear un archivo `.env` y colocar las siguientes variables de entorno:
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```bash
+JWT_SECRET=
 
-## License
+MYSQL_HOST=
+MYSQL_PORT=
+MYSQL_USER=
+MYSQL_PASSWORD=
+MYSQL_DATABASE=
+```
 
-Nest is [MIT licensed](LICENSE).
+2. Para levantar el servidor deberá tener instalado `docker` y en el directorio raíz ejecutar:
+
+```bash
+$ docker compose up -d
+```
+
+Este comando levantará tanto la base de datos como el servidor.
+
+3. Para ver la documentación del API deberá ir a la ruta `/docs` (Ejemplo: `http://localhost:3000/docs`). 

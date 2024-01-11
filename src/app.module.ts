@@ -43,7 +43,7 @@ import { UsersModule } from './users/users.module';
         password: process.env.MYSQL_PASSWORD,
         database: process.env.MYSQL_DATABASE,
         autoLoadEntities: true,
-        // synchronize: process.env.NODE_ENV !== 'production',
+        synchronize: true,
       }),
     }),
     ConfigModule.forRoot({

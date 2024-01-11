@@ -76,3 +76,4 @@ Este comando levantará tanto la base de datos como el servidor.
 ## Recursos
 
 * [Presentación](https://docs.google.com/presentation/d/1QXw1tE0_59PxNA6fZ7fQUNQ8QYDu-1m1zPe3W5MEJyk/edit?usp=sharing)
+* [URI EC2](http://ec2-18-223-136-202.us-east-2.compute.amazonaws.com:3000/docs)
